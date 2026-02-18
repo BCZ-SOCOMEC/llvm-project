@@ -4302,7 +4302,14 @@ void TokenAnnotator::calculateUnbreakableTailLengths(
     AnnotatedLine &Line) const {
   unsigned UnbreakableTailLength = 0;
   FormatToken *Current = Line.Last;
+  // Use a set to detect cycles in the token chain, which can occur with
+  // certain macro expansion patterns where Previous/Next pointers form a loop.
+  llvm::SmallPtrSet<FormatToken *, 16> Visited;
   while (Current) {
+    // If we've already visited this token, break to avoid infinite loop.
+    if (!Visited.insert(Current).second)
+      break;
+
     Current->UnbreakableTailLength = UnbreakableTailLength;
     if (Current->CanBreakBefore ||
         Current->isOneOf(tok::comment, tok::string_literal)) {
