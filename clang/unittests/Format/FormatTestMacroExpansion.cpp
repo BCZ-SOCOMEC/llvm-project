@@ -309,6 +309,16 @@ TEST_F(FormatTestMacroExpansion, IndentChildrenWithinMacroCall) {
                Style);
 }
 
+TEST_F(FormatTestMacroExpansion, FormatWithMacroSuroundedByParenthesis) {
+  FormatStyle Style = getLLVMStyle();
+  Style.Macros.push_back("AND=&&");
+  verifyFormat("void f() {\n"
+               "  if ((a) AND (b)) {\n"
+               "  }\n"
+               "}",
+               Style);
+}
+
 } // namespace
 } // namespace test
 } // namespace format
